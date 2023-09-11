@@ -9,6 +9,6 @@ package snake.logic
 // * toString is implemented as you expect ("Point(2,3)")
 //
 // This is explained in lecture 4
-case class Point(x : Int, y : Int) {
-
+case class Point(x: Int, y: Int) {
+  def +(rhs: Point): Point = Point(x + rhs.x, y + rhs.y)
 }
