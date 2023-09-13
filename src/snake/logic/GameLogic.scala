@@ -3,6 +3,8 @@ package snake.logic
 import engine.random.{RandomGenerator, ScalaRandomGen}
 import snake.logic.GameLogic._
 
+import scala.util.control.Breaks.break
+
 /** To implement Snake, complete the ``TODOs`` below.
  *
  * If you need additional files,
@@ -10,26 +12,31 @@ import snake.logic.GameLogic._
  */
 class GameLogic(val random: RandomGenerator,
                 val gridDims: Dimensions) {
-
-  def gameOver: Boolean = snake.tail.exists(segment => segment._1 == nextPosition)
+  def gameOver: Boolean = {
+    snake.tail.exists(segment => segment._1 == snake.head._1)
+  }
 
   var currentPosition = Point(2, 0)
   var currentDirection: Direction = East()
+  var previousDirection: Direction = West()
   var nextPosition = Point(2, 0)
 
 
   var snake: List[(Point, CellType)] = List((Point(2, 0), SnakeHead(East())), (Point(1, 0), SnakeBody()), (Point(0, 0), SnakeBody()))
 
-  val allPoints: IndexedSeq[Point] =
-    for {
-      x <- 0 until gridDims.width
-      y <- 0 until gridDims.height
-    } yield Point(x, y)
+  var currentApple = chooseRandomApple()
+  var toGrow = 0
 
-  var freeSpots: List[Point] = allPoints.toList
+  def freePositions(): List[Point] = {
+    val positionsList = gridDims.allPointsInside
+    positionsList.filter(p => getCellType(p) == Empty()).toList
+  }
 
-
-  var currentApple = Point(random.randomInt(gridDims.width), random.randomInt(gridDims.height))
+  def chooseRandomApple(): Point = {
+    val free = freePositions()
+    if (free.isEmpty) Point(-1, -1) // or any invalid point
+    else free(random.randomInt(free.length))
+  }
 
   // TODO implement me
   def step(): Unit = {
@@ -41,6 +48,7 @@ class GameLogic(val random: RandomGenerator,
       case South() => nextPosition = currentPosition + South().toPoint
     }
 
+
     if (nextPosition.x > gridDims.width - 1) nextPosition = Point(0, nextPosition.y)
     if (nextPosition.x < 0) nextPosition = Point(gridDims.width - 1, nextPosition.y)
     if (nextPosition.y > gridDims.height - 1) nextPosition = Point(nextPosition.x, 0)
@@ -49,42 +57,43 @@ class GameLogic(val random: RandomGenerator,
     if (gameOver) return
 
     val newHead = (nextPosition, SnakeHead(currentDirection))
-
     val increment = 1.0f / snake.length
 
     val updatedBody = snake.map {
+      case (point, SnakeHead(_)) => (point, SnakeBody(increment))
+      case (point, SnakeBody(distance)) => (point, SnakeBody(distance + increment))
+    }
 
-      case (point, SnakeHead(_))
-      => (point, SnakeBody(increment))
+    snake = newHead +: updatedBody.init
 
-      case (point, SnakeBody(distance))
-      => (point, SnakeBody(distance + increment))
-
+    if (toGrow > 0) {
+      snake = snake :+ updatedBody.last
+      toGrow -= 1
     }
 
     if (nextPosition == currentApple) {
-      snake = newHead +: updatedBody
-      currentApple = Point(random.randomInt(gridDims.width), random.randomInt(gridDims.height))
-    } else {
-      snake = newHead +: updatedBody.init
+      toGrow += 3
+      currentApple = chooseRandomApple()
     }
 
+    previousDirection = currentDirection
     currentPosition = nextPosition
   }
 
   // TODO implement me
   def changeDir(d: Direction): Unit = {
     d match {
-      case East() => currentDirection = East()
-      case West() => currentDirection = West()
-      case North() => currentDirection = North()
-      case South() => currentDirection = South()
+      case East() if currentDirection != West() && previousDirection != West() => currentDirection = East()
+      case West() if currentDirection != East() && previousDirection != East() => currentDirection = West()
+      case North() if currentDirection != South() && previousDirection != South() => currentDirection = North()
+      case South() if currentDirection != North() && previousDirection != North() => currentDirection = South()
+      case _ =>
     }
   }
 
   // TODO implement me
   def getCellType(p: Point): CellType = {
-    if (p == currentApple) {
+    if (p == currentApple && currentApple.x >= 0) {
       Apple()
     } else {
       snake.find(segment => segment._1 == p).map(segment => segment._2).getOrElse(Empty())
