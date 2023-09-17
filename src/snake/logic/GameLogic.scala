@@ -16,46 +16,40 @@ class GameLogic(val random: RandomGenerator,
     snake.tail.exists(segment => segment._1 == snake.head._1)
   }
 
-  var currentPosition = Point(2, 0)
-  var currentDirection: Direction = East()
-  var previousDirection: Direction = West()
-  var nextPosition = Point(2, 0)
+  private var currentPosition = Point(2, 0)
+  private var nextPosition = Point(2, 0)
+  private var currentDirection: Direction = East()
+  private var previousDirection: Direction = West()
+  private var toGrow = 0
+  private var snake: List[(Point, CellType)] = List(
+    (Point(2, 0), SnakeHead(East())),
+    (Point(1, 0), SnakeBody()),
+    (Point(0, 0), SnakeBody())
+  )
+  private var currentApple = chooseRandomApple()
 
-
-  var snake: List[(Point, CellType)] = List((Point(2, 0), SnakeHead(East())), (Point(1, 0), SnakeBody()), (Point(0, 0), SnakeBody()))
-
-  var currentApple = chooseRandomApple()
-  var toGrow = 0
-
-  def freePositions(): List[Point] = {
+  private def freePositions(): List[Point] = {
     val positionsList = gridDims.allPointsInside
     positionsList.filter(p => getCellType(p) == Empty()).toList
   }
 
-  def chooseRandomApple(): Point = {
+  private def chooseRandomApple(): Point = {
     val free = freePositions()
-    if (free.isEmpty) Point(-1, -1) // or any invalid point
+    if (free.isEmpty) Point(-1, -1)
     else free(random.randomInt(free.length))
   }
 
-  // TODO implement me
-  def step(): Unit = {
+  private def updateNextPosition(): Unit = {
 
-    currentDirection match {
-      case East() => nextPosition = currentPosition + East().toPoint
-      case West() => nextPosition = currentPosition + West().toPoint
-      case North() => nextPosition = currentPosition + North().toPoint
-      case South() => nextPosition = currentPosition + South().toPoint
-    }
-
+    nextPosition = currentPosition + currentDirection.toPoint
 
     if (nextPosition.x > gridDims.width - 1) nextPosition = Point(0, nextPosition.y)
     if (nextPosition.x < 0) nextPosition = Point(gridDims.width - 1, nextPosition.y)
     if (nextPosition.y > gridDims.height - 1) nextPosition = Point(nextPosition.x, 0)
     if (nextPosition.y < 0) nextPosition = Point(nextPosition.x, gridDims.height - 1)
+  }
 
-    if (gameOver) return
-
+  private def updateSnake(): Unit = {
     val newHead = (nextPosition, SnakeHead(currentDirection))
     val increment = 1.0f / snake.length
 
@@ -70,6 +64,14 @@ class GameLogic(val random: RandomGenerator,
       snake = snake :+ updatedBody.last
       toGrow -= 1
     }
+  }
+
+  def step(): Unit = {
+    updateNextPosition()
+
+    if (gameOver) return
+
+    updateSnake()
 
     if (nextPosition == currentApple) {
       toGrow += 3
@@ -80,18 +82,22 @@ class GameLogic(val random: RandomGenerator,
     currentPosition = nextPosition
   }
 
-  // TODO implement me
-  def changeDir(d: Direction): Unit = {
-    d match {
-      case East() if currentDirection != West() && previousDirection != West() => currentDirection = East()
-      case West() if currentDirection != East() && previousDirection != East() => currentDirection = West()
-      case North() if currentDirection != South() && previousDirection != South() => currentDirection = North()
-      case South() if currentDirection != North() && previousDirection != North() => currentDirection = South()
-      case _ =>
+  private def isDirectionChangeAllowed(newDirection: Direction): Boolean = {
+    newDirection match {
+      case East() if currentDirection != West() && previousDirection != West() => true
+      case West() if currentDirection != East() && previousDirection != East() => true
+      case North() if currentDirection != South() && previousDirection != South() => true
+      case South() if currentDirection != North() && previousDirection != North() => true
+      case _ => false
     }
   }
 
-  // TODO implement me
+  def changeDir(d: Direction): Unit = {
+    if (isDirectionChangeAllowed(d)) {
+      currentDirection = d
+    }
+  }
+
   def getCellType(p: Point): CellType = {
     if (p == currentApple && currentApple.x >= 0) {
       Apple()

@@ -16,6 +16,8 @@ package snake.logic
  */
 sealed abstract class Direction {
   def opposite: Direction
+
+  def toPoint: Point
 }
 
 case class East() extends Direction {
