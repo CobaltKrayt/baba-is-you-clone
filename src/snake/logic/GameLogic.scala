@@ -44,9 +44,10 @@ class GameLogic(val random: RandomGenerator,
     nextPosition = currentPosition + currentDirection.toPoint
 
     if (nextPosition.x > gridDims.width - 1) nextPosition = Point(0, nextPosition.y)
-    if (nextPosition.x < 0) nextPosition = Point(gridDims.width - 1, nextPosition.y)
+    else if (nextPosition.x < 0) nextPosition = Point(gridDims.width - 1, nextPosition.y)
+
     if (nextPosition.y > gridDims.height - 1) nextPosition = Point(nextPosition.x, 0)
-    if (nextPosition.y < 0) nextPosition = Point(nextPosition.x, gridDims.height - 1)
+    else if (nextPosition.y < 0) nextPosition = Point(nextPosition.x, gridDims.height - 1)
   }
 
   private def updateSnake(): Unit = {
