@@ -13,7 +13,7 @@ import scala.util.control.Breaks.break
  */
 case class AppleGenerator(gridDims: Dimensions, random: RandomGenerator) {
 
-  def getAvailablePositions(snake: List[Point]): List[Point] = {
+  private def getAvailablePositions(snake: List[Point]): List[Point] = {
     val positionsList = gridDims.allPointsInside
     positionsList.filter(p => !snake.contains(p)).toList
   }
@@ -56,6 +56,7 @@ case class GameState(gridDims: Dimensions, snake: List[Point],
 
   def nextState(nextDirection: Direction): GameState = {
     if (nextPosition(nextDirection) == currentApple) {
+
       val newApple = appleGenerator.generateRandomApple(nextSnake(nextDirection))
       GameState(gridDims, nextSnake(nextDirection), newApple, appleGenerator, nextDirection, Math.max(toGrow - 1, 0) + 3)
     }
@@ -69,13 +70,13 @@ case class GameState(gridDims: Dimensions, snake: List[Point],
 class GameLogic(val random: RandomGenerator,
                 val gridDims: Dimensions) {
 
-  var currentDirection: Direction = East()
-  var reverseFlag: Boolean = false
-  val toGrow = 0
-  val initialSnake: List[(Point)] = List((Point(2, 0)), (Point(1, 0)), (Point(0, 0)))
-  val appleGenerator = new AppleGenerator(gridDims, random)
-  val initialApple = appleGenerator.generateRandomApple(initialSnake)
-  var gameStates: List[GameState] = List(GameState(gridDims, initialSnake, initialApple, appleGenerator, currentDirection, toGrow))
+  private var currentDirection: Direction = East()
+  private var reverseFlag: Boolean = false
+  private val toGrow = 0
+  private val initialSnake: List[Point] = List(Point(2, 0), Point(1, 0), Point(0, 0))
+  private val appleGenerator = AppleGenerator(gridDims, random)
+  private val initialApple = appleGenerator.generateRandomApple(initialSnake)
+  private var gameStates: List[GameState] = List(GameState(gridDims, initialSnake, initialApple, appleGenerator, currentDirection, toGrow))
 
   def gameOver: Boolean = {
     val lastState = gameStates.last
@@ -90,14 +91,14 @@ class GameLogic(val random: RandomGenerator,
     }
   }
 
-  def reverseSnake(): Unit = {
+  private def reverseSnake(): Unit = {
     if (gameStates.length > 1) {
       gameStates = gameStates.init
       currentDirection = gameStates.last.previousDirection
     }
   }
 
-  def isDirectionChangeAllowed(newDirection: Direction): Boolean = {
+  private def canChangeDirection(newDirection: Direction): Boolean = {
 
     val previousDirection =
       if (gameStates.length >= 2) gameStates.last.previousDirection
@@ -107,17 +108,23 @@ class GameLogic(val random: RandomGenerator,
   }
 
   def changeDir(d: Direction): Unit = {
-    if (isDirectionChangeAllowed(d)) {
+    if (canChangeDirection(d)) {
       currentDirection = d
     }
   }
 
   def getCellType(p: Point): CellType = {
     val lastState = gameStates.last
+
+    def computeDistanceToHead: Float = {
+      val index = lastState.snake.indexOf(p)
+      index.toFloat / (lastState.snake.length - 1)
+    }
+
     p match {
       case _ if p == lastState.currentApple => Apple()
       case _ if lastState.snake.head == p => SnakeHead(currentDirection)
-      case _ if lastState.snake.contains(p) => SnakeBody()
+      case _ if lastState.snake.contains(p) => SnakeBody(computeDistanceToHead)
       case _ => Empty()
     }
   }
