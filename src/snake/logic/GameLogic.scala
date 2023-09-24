@@ -29,7 +29,7 @@ case class AppleGenerator(gridDims: Dimensions, random: RandomGenerator) {
 case class GameState(gridDims: Dimensions, snake: List[Point],
                      currentApple: Point,
                      appleGenerator: AppleGenerator,
-                     currentDirection: Direction,
+                     previousDirection: Direction,
                      toGrow: Int) {
   private def checkBounds(point: Point): Point = point match {
     case Point(x, y) if x > gridDims.width - 1 => Point(0, y)
@@ -52,7 +52,6 @@ case class GameState(gridDims: Dimensions, snake: List[Point],
     } else {
       newHead +: snake.init
     }
-
   }
 
   def nextState(nextDirection: Direction): GameState = {
@@ -99,7 +98,7 @@ class GameLogic(val random: RandomGenerator,
     if (reverseFlag) {
       if (gameStates.length > 1) {
         gameStates = gameStates.init
-        currentDirection = gameStates.last.currentDirection
+        currentDirection = gameStates.last.previousDirection
       }
     } else if (!gameOver) {
       gameStates = gameStates :+ gameStates.last.nextState(currentDirection)
@@ -110,7 +109,7 @@ class GameLogic(val random: RandomGenerator,
   def isDirectionChangeAllowed(newDirection: Direction): Boolean = {
 
     val previousDirection =
-      if (gameStates.length >= 2) gameStates(gameStates.length - 2).currentDirection
+      if (gameStates.length >= 2) gameStates.last.previousDirection
       else currentDirection
 
     newDirection match {
@@ -125,10 +124,6 @@ class GameLogic(val random: RandomGenerator,
   def changeDir(d: Direction): Unit = {
     if (isDirectionChangeAllowed(d)) {
       currentDirection = d
-      if (gameStates.nonEmpty) {
-        val lastState = gameStates.last
-        gameStates = gameStates.dropRight(1) :+ lastState.copy(currentDirection = d)
-      }
     }
   }
 
@@ -139,7 +134,6 @@ class GameLogic(val random: RandomGenerator,
     case _ => Empty()
   }
 
-  // TODO implement me
   def setReverse(r: Boolean): Unit = {
     reverseFlag = r
   }
