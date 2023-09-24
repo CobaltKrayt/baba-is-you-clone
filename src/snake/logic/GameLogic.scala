@@ -3,6 +3,7 @@ package snake.logic
 import engine.random.{RandomGenerator, ScalaRandomGen}
 import snake.logic.GameLogic._
 
+import scala.collection.immutable.Queue
 import scala.util.control.Breaks.break
 
 /** To implement Snake, complete the ``TODOs`` below.
@@ -10,80 +11,108 @@ import scala.util.control.Breaks.break
  * If you need additional files,
  * please also put them in the ``snake`` package.
  */
-class GameLogic(val random: RandomGenerator,
-                val gridDims: Dimensions) {
-  def gameOver: Boolean = {
-    snake.tail.exists(segment => segment._1 == snake.head._1)
-  }
+case class AppleGenerator(gridDims: Dimensions, random: RandomGenerator) {
 
-  private var currentPosition = Point(2, 0)
-  private var nextPosition = Point(2, 0)
-  private var currentDirection: Direction = East()
-  private var previousDirection: Direction = West()
-  private var toGrow = 0
-  private var snake: List[(Point, CellType)] = List(
-    (Point(2, 0), SnakeHead(East())),
-    (Point(1, 0), SnakeBody()),
-    (Point(0, 0), SnakeBody())
-  )
-  private var currentApple = chooseRandomApple()
-
-  private def freePositions(): List[Point] = {
+  def freePositions(snake: List[Point]): List[Point] = {
     val positionsList = gridDims.allPointsInside
-    positionsList.filter(p => getCellType(p) == Empty()).toList
+    positionsList.filter(p => !snake.contains(p)).toList
   }
 
-  private def chooseRandomApple(): Point = {
-    val free = freePositions()
+  def chooseRandomApple(snake: List[Point]): Point = {
+    val free = freePositions(snake)
     if (free.isEmpty) Point(-1, -1)
     else free(random.randomInt(free.length))
   }
 
-  private def updateNextPosition(): Unit = {
+}
 
-    nextPosition = currentPosition + currentDirection.toPoint
-
-    if (nextPosition.x > gridDims.width - 1) nextPosition = Point(0, nextPosition.y)
-    else if (nextPosition.x < 0) nextPosition = Point(gridDims.width - 1, nextPosition.y)
-
-    if (nextPosition.y > gridDims.height - 1) nextPosition = Point(nextPosition.x, 0)
-    else if (nextPosition.y < 0) nextPosition = Point(nextPosition.x, gridDims.height - 1)
+case class GameState(gridDims: Dimensions, snake: List[Point],
+                     currentApple: Point,
+                     appleGenerator: AppleGenerator,
+                     currentDirection: Direction,
+                     toGrow: Int) {
+  private def checkBounds(point: Point): Point = point match {
+    case Point(x, y) if x > gridDims.width - 1 => Point(0, y)
+    case Point(x, y) if x < 0 => Point(gridDims.width - 1, y)
+    case Point(x, y) if y > gridDims.height - 1 => Point(x, 0)
+    case Point(x, y) if y < 0 => Point(x, gridDims.height - 1)
+    case _ => point
   }
 
-  private def updateSnake(): Unit = {
-    val newHead = (nextPosition, SnakeHead(currentDirection))
-    val increment = 1.0f / snake.length
+  private def nextPosition(nextDirection: Direction): Point = {
+    val nextPosition = snake.head + nextDirection.toPoint
+    checkBounds(nextPosition)
+  }
 
-    val updatedBody = snake.map {
-      case (point, SnakeHead(_)) => (point, SnakeBody(increment))
-      case (point, SnakeBody(distance)) => (point, SnakeBody(distance + increment))
-    }
+  private def nextSnake(nextDirection: Direction): List[Point] = {
 
-    snake = newHead +: updatedBody.init
-
+    val newHead: Point = nextPosition(nextDirection)
     if (toGrow > 0) {
-      snake = snake :+ updatedBody.last
-      toGrow -= 1
+      newHead +: snake
+    } else {
+      newHead +: snake.init
+    }
+
+  }
+
+  def nextState(nextDirection: Direction): GameState = {
+    if (nextPosition(nextDirection) == currentApple) {
+      val newApple = appleGenerator.chooseRandomApple(nextSnake(nextDirection))
+      GameState(gridDims, nextSnake(nextDirection), newApple, appleGenerator, nextDirection, Math.max(toGrow - 1, 0) + 3)
+    }
+    else {
+      GameState(gridDims, nextSnake(nextDirection), currentApple, appleGenerator, nextDirection, Math.max(toGrow - 1, 0))
     }
   }
+
+}
+
+class GameLogic(val random: RandomGenerator,
+                val gridDims: Dimensions) {
+  def gameOver: Boolean = {
+    gameStates.last.snake.tail.contains(gameStates.last.snake.head)
+  }
+
+  // Variable:
+  // State List
+  // Reverse flag
+  // Current direction
+  // GameState arguments (Snake, currentDirection, isReverse, toGrow)
+  // Need to find a solution to avoid having an argument called toGrow in order to make it immutable, right?
+
+  var currentDirection: Direction = East()
+  var reverseFlag: Boolean = false
+
+  val toGrow = 0
+
+  val snake: List[(Point)] = List(
+    (Point(2, 0)),
+    (Point(1, 0)),
+    (Point(0, 0))
+  )
+  val appleGenerator = new AppleGenerator(gridDims, random)
+  val currentApple = appleGenerator.chooseRandomApple(snake)
+
+  var gameStates: List[GameState] = List(GameState(gridDims, snake, currentApple, appleGenerator, currentDirection, toGrow))
 
   def step(): Unit = {
-    updateNextPosition()
-
-    if (gameOver) return
-
-    updateSnake()
-
-    if (nextPosition == currentApple) {
-      toGrow += 3
-      currentApple = chooseRandomApple()
+    if (reverseFlag) {
+      if (gameStates.length > 1) {
+        gameStates = gameStates.init
+        currentDirection = gameStates.last.currentDirection
+      }
+    } else if (!gameOver) {
+      gameStates = gameStates :+ gameStates.last.nextState(currentDirection)
     }
 
-    previousDirection = currentDirection
-    currentPosition = nextPosition
   }
 
-  private def isDirectionChangeAllowed(newDirection: Direction): Boolean = {
+  def isDirectionChangeAllowed(newDirection: Direction): Boolean = {
+
+    val previousDirection =
+      if (gameStates.length >= 2) gameStates(gameStates.length - 2).currentDirection
+      else currentDirection
+
     newDirection match {
       case East() if currentDirection != West() && previousDirection != West() => true
       case West() if currentDirection != East() && previousDirection != East() => true
@@ -96,19 +125,24 @@ class GameLogic(val random: RandomGenerator,
   def changeDir(d: Direction): Unit = {
     if (isDirectionChangeAllowed(d)) {
       currentDirection = d
+      if (gameStates.nonEmpty) {
+        val lastState = gameStates.last
+        gameStates = gameStates.dropRight(1) :+ lastState.copy(currentDirection = d)
+      }
     }
   }
 
-  def getCellType(p: Point): CellType = {
-    if (p == currentApple && currentApple.x >= 0) {
-      Apple()
-    } else {
-      snake.find(segment => segment._1 == p).map(segment => segment._2).getOrElse(Empty())
-    }
+  def getCellType(p: Point): CellType = p match {
+    case _ if p == gameStates.last.currentApple && gameStates.last.currentApple.x >= 0 => Apple()
+    case _ if gameStates.last.snake.indexOf(p) == 0 => SnakeHead(currentDirection)
+    case _ if gameStates.last.snake.contains(p) => SnakeBody()
+    case _ => Empty()
   }
 
   // TODO implement me
-  def setReverse(r: Boolean): Unit = ()
+  def setReverse(r: Boolean): Unit = {
+    reverseFlag = r
+  }
 
 }
 
