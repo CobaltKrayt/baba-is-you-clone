@@ -10,7 +10,7 @@ import processing.event.KeyEvent
 import java.awt.event.KeyEvent._
 import engine.GameBase
 import engine.graphics.{Color, Point, Rectangle}
-import baba.logic.{Baba, Block, Connector, Dimensions, Direction, East, Empty, Environment, GameLogic, North, South, StopRule, Wall, WallRule, West, Point => GridPoint}
+import baba.logic.{Baba, BabaSubject, Block, Connector, Dimensions, Direction, East, Empty, Environment, GameLogic, North, South, StopRule, Wall, WallRule, West, Point => GridPoint}
 import baba.game.BabaGame._
 import engine.graphics.Color._
 import engine.random.ScalaRandomGen
@@ -31,6 +31,7 @@ class BabaGame extends GameBase {
   var wallRule: PImage = _
   var isConnector: PImage = _
   var stopRule: PImage = _
+  var babaSubject: PImage = _
 
   // this function is wrongly named draw by processing (is called on each update next to drawing)
   override def draw(): Unit = {
@@ -91,6 +92,8 @@ class BabaGame extends GameBase {
           drawRectangle(area)
         case WallRule(_) =>
           image(wallRule, area.left, area.top, area.width, area.height)
+        case BabaSubject(_) =>
+          image(babaSubject, area.left, area.top, area.width, area.height)
         case Connector(_) =>
           image(isConnector, area.left, area.top, area.width, area.height)
         case StopRule(_) =>
@@ -152,6 +155,7 @@ class BabaGame extends GameBase {
     wallRule = loadImage("wallRule.png")
     isConnector = loadImage("isConnector.png")
     stopRule = loadImage("stopRule.png")
+    babaSubject = loadImage("baba_subject.png")
     // Fonts are loaded lazily, so when we call text()
     // for the first time, there is significant lag.
     // This prevents it from happening during gameplay.

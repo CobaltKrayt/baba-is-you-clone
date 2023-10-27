@@ -15,8 +15,6 @@ import scala.util.control.Breaks.break
 case class GameState(gridDims: Dimensions, player: List[Block], gameMap: List[Block],
                      previousDirection: Direction) {
 
-  val updatedGameMap = new ListBuffer[Block]() ++ gameMap
-
   def getBlockAtPosition(p: Point): Block = {
     gameMap.find(_.coordinates == p).getOrElse(Empty())
   }
@@ -26,54 +24,84 @@ case class GameState(gridDims: Dimensions, player: List[Block], gameMap: List[Bl
   }
 
 
-  private def nextPosition(nextDirection: Direction, block: Block): Point = {
-    val nextPosition = block.coordinates + nextDirection.toPoint
+  private def nextPosition(nextDirection: Direction, coords: Point): Point = {
+    val nextPosition = coords + nextDirection.toPoint
     nextPosition
   }
 
-  private def nextPlayer(nextDirection: Direction): (List[Block], List[Block]) = {
 
-    val updatedGameMap = new ListBuffer[Block]() ++ gameMap
+  private def nextPlayer(nextDirection: Direction): List[Block] = {
+    player.flatMap { playerBlock =>
+      val newPosition = nextPosition(nextDirection, playerBlock.coordinates)
 
-    val newPlayerBlocks = player.flatMap { playerBlock =>
-      val newPosition = nextPosition(nextDirection, playerBlock)
-
-
-      updatedGameMap.find(block => block.coordinates == newPosition) match {
-
-        case Some(block) if block.push =>
-          val pushedBlockNewPosition = nextPosition(nextDirection, block)
-          if (updatedGameMap.exists(b => b.coordinates == pushedBlockNewPosition && b.stop && !b.isInstanceOf[RuleBlock])) {
-            Some(playerBlock)
-          } else {
-
-            updatedGameMap -= block
-
-            val newBlock = block match {
-              case _: Connector => Connector(pushedBlockNewPosition)
-              case _: WallRule => WallRule(pushedBlockNewPosition)
-              case _: StopRule => StopRule(pushedBlockNewPosition)
-              case _ => block
-            }
-
-            updatedGameMap += newBlock
-            Some(Baba(nextDirection, newPosition))
-          }
-        case Some(block) if block.stop =>
+      gameMap.find(block => block.coordinates == newPosition) match {
+        case Some(block) if block.stop && !block.isInstanceOf[RuleBlock] =>
           Some(playerBlock)
         case _ =>
-          Some(Baba(nextDirection, newPosition))
+          val chainOfBlocks = findChainOfBlocks(playerBlock.coordinates, nextDirection)
+          if (moveChain(chainOfBlocks, nextDirection)) {
+            Some(Wall(newPosition))
+          } else {
+            Some(playerBlock)
+          }
       }
     }
 
-    (newPlayerBlocks.toList, updatedGameMap.toList)
   }
 
-  def nextState(nextDirection: Direction): GameState = {
-    val (newPlayerBlocks, updatedGameMap) = nextPlayer(nextDirection)
 
-    if (newPlayerBlocks.forall(block => isWithinGrid(block.coordinates, gridDims))) {
-      GameState(gridDims, newPlayerBlocks, updatedGameMap, nextDirection)
+  private def findChainOfBlocks(startPosition: Point, direction: Direction): List[Block] = {
+    var currentPosition = startPosition
+    var chain = ListBuffer[Block]()
+    var keepSearching = true
+
+    while (keepSearching) {
+      val nextPos = nextPosition(direction, currentPosition)
+      gameMap.find(block => block.coordinates == nextPos) match {
+        case Some(block) if block.isInstanceOf[RuleBlock] =>
+          chain.append(block)
+          currentPosition = nextPos
+        case Some(block) if !block.isInstanceOf[RuleBlock] && block.stop =>
+          keepSearching = false
+        case _ =>
+          keepSearching = false
+      }
+    }
+
+    chain.toList
+  }
+
+  private def moveChain(chain: List[Block], direction: Direction): Boolean = {
+    if (chain.nonEmpty) {
+      val endBlockPosition = nextPosition(direction, chain.last.coordinates)
+
+      // Check if the end block position is within grid and not hitting a stop block
+      if (isWithinGrid(endBlockPosition, gridDims) && !gameMap.exists(b => b.coordinates == endBlockPosition && b.stop)) {
+        chain.foreach { block =>
+          val newBlockPosition = nextPosition(direction, block.coordinates)
+
+          // Only move the block if the new position is within grid
+          if (isWithinGrid(newBlockPosition, gridDims)) {
+            block.coordinates = newBlockPosition
+          } else {
+            return false
+          }
+        }
+        true
+      } else {
+        false
+      }
+    } else {
+      true
+    }
+  }
+
+
+  def nextState(nextDirection: Direction): GameState = {
+    val newPlayerBlocks = nextPlayer(nextDirection)
+
+    if (newPlayerBlocks.forall(block => isWithinGrid(block.coordinates, gridDims)) && !newPlayerBlocks.exists(_.stop)) {
+      GameState(gridDims, newPlayerBlocks, gameMap, nextDirection)
     } else {
       this
     }
@@ -85,9 +113,10 @@ class GameLogic(val random: RandomGenerator,
                 val gridDims: Dimensions) {
 
   var currentDirection: Direction = East()
-  private val initalPlayer: List[Block] = List(Baba(currentDirection, Point(2, 0)), Baba(currentDirection, Point(3, 1)))
+  var currentRules: List[Rule] = List()
+  private val initalPlayer: List[Block] = List(Wall(Point(2, 0)), Wall(Point(3, 1)))
   private val initialGameMap: List[Block] = List(Wall(Point(6, 6)), Wall(Point(6, 8)), WallRule(Point(8, 8))
-    , Connector(Point(8, 9)), StopRule(Point(9, 9)))
+    , Connector(Point(8, 9)), StopRule(Point(9, 9)), BabaSubject(Point(12, 12)))
 
   private var gameStates: List[GameState] = List(GameState(gridDims, initalPlayer, initialGameMap, currentDirection))
 
@@ -122,12 +151,22 @@ class GameLogic(val random: RandomGenerator,
     rules.toList
   }
 
-  def gameOver: Boolean = false
+  def gameOver: Boolean = gameStates.last.player.exists(_.stop)
 
   def step(): Unit = {
     if (!gameOver) {
-      val rules: List[Rule] = detectRules()
-      rules.foreach(_.evaluate(gameStates.last.gameMap))
+
+      val newRules: List[Rule] = detectRules()
+
+      currentRules.foreach { rule =>
+        if (!newRules.contains(rule)) {
+          rule.revert(gameStates.last.gameMap)
+        }
+      }
+
+      newRules.foreach(_.evaluate(gameStates.last.gameMap ++ gameStates.last.player))
+
+      currentRules = newRules
       gameStates = gameStates :+ gameStates.last.nextState(currentDirection)
     }
   }

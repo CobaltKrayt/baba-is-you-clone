@@ -2,14 +2,35 @@ package baba.logic
 
 case class Rule(subject: Subject, predicate: Predicate) {
   def evaluate(blocks: List[Block]): Unit = {
-    // Here, you would implement the logic of what the rule means.
-    // For example, if subject is Wall and predicate is Stop,
-    // then walls become obstacles that can't be passed through.
-    if (subject.isInstanceOf[WallRule] && predicate.isInstanceOf[StopRule]) {
-      blocks.foreach {
-        case wall: Wall => wall.stop = true
-        case _ =>
-      }
+    blocks.foreach { block =>
+      if (matchesSubject(block)) predicate.action.applyAction(block)
+    }
+  }
+
+  def revert(blocks: List[Block]): Unit = {
+    blocks.foreach { block =>
+      if (matchesSubject(block)) predicate.action.revertAction(block)
+    }
+  }
+
+  private def matchesSubject(block: Block): Boolean = {
+    subject match {
+      case subject: WallRule => block.isInstanceOf[Wall]
+      case subject: BabaSubject => block.isInstanceOf[Baba]
+      case _ => false
     }
   }
 }
+
+trait Action {
+  def applyAction(block: Block): Unit
+
+  def revertAction(block: Block): Unit
+}
+
+case class StopAction() extends Action {
+  def applyAction(block: Block): Unit = block.stop = true
+
+  def revertAction(block: Block): Unit = block.stop = false
+}
+

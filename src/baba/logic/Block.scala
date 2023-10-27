@@ -25,7 +25,6 @@ abstract class Subject(override val location: Point) extends RuleBlock(location)
 
   override var stop: Boolean = true
 
-
 }
 
 case class WallRule(override val location: Point) extends Subject(location) {
@@ -33,9 +32,15 @@ case class WallRule(override val location: Point) extends Subject(location) {
   override var push: Boolean = true
 }
 
+case class BabaSubject(override val location: Point) extends Subject(location) {
+  override var coordinates: Point = location
+  override var push: Boolean = true
+}
+
 abstract class Predicate(override val location: Point) extends RuleBlock(location) {
   override var coordinates: Point = location
 
+  def action: Action
 
   override var stop: Boolean = true
 }
@@ -43,6 +48,8 @@ abstract class Predicate(override val location: Point) extends RuleBlock(locatio
 
 case class StopRule(override val location: Point) extends Predicate(location) {
   override var push: Boolean = true
+
+  override def action: Action = StopAction()
 }
 
 
@@ -50,19 +57,18 @@ abstract class Environment(val location: Point) extends Block {
   override var coordinates: Point = location
 
   override var push: Boolean = false
+  override var stop: Boolean = false
 
 
 }
 
 case class Baba(direction: Direction, override val location: Point) extends Environment(location) {
 
-  override var stop: Boolean = false
 
 }
 
 case class Wall(override val location: Point) extends Environment(location) {
 
-  override var stop: Boolean = false
 }
 
 case class Empty() extends Block {
