@@ -1,0 +1,188 @@
+	Empty()
+	Empty()
+	Apple()
+*List(Point(0,0), Point(1,0), Point(2,0))
+	Empty()
+	Empty()
+	Apple()
+List()
+	Apple()
+List(Point(3,0))
+	Empty()
+	Empty()
+	Empty()
+	Empty()
+	Empty()
+	Empty()
+	Empty()
+	Empty()
+	Empty()
+	Empty()
+	SnakeBody(0.0)
+
+	Empty()
+
+SnakeBody(0.33333334)
+	Empty()
+	Empty()
+	Empty()
+	Apple()
+ÒList(Point(0,0), Point(1,0), Point(5,0), Point(6,0), Point(7,0), Point(8,0), Point(9,0), Point(0,1), Point(1,1), Point(2,1), Point(3,1), Point(4,1), Point(5,1), Point(6,1), Point(7,1), Point(8,1), Point(9,1))
+	Empty()
+	Empty()
+	Empty()
+	Empty()
+	Empty()
+	Apple()
+ºList(Point(0,0), Point(4,0), Point(5,0), Point(6,0), Point(7,0), Point(8,0), Point(9,0), Point(10,0), Point(11,0), Point(12,0), Point(13,0), Point(0,1), Point(1,1), Point(2,1), Point(3,1), Point(4,1), Point(5,1), Point(6,1), Point(7,1), Point(8,1), Point(9,1), Point(10,1), Point(11,1), Point(12,1), Point(13,1))
+	Empty()
+	Apple()
+¢List(Point(0,0), Point(6,0), Point(7,0), Point(8,0), Point(9,0), Point(10,0), Point(11,0), Point(12,0), Point(13,0), Point(0,1), Point(1,1), Point(2,1), Point(3,1), Point(4,1), Point(5,1), Point(6,1), Point(7,1), Point(8,1), Point(9,1), Point(10,1), Point(11,1), Point(12,1), Point(13,1))
+	Empty()
+	Empty()
+	Empty()
+	Empty()
+	Empty()
+	Empty()
+	Empty()
+	Empty()
+	Empty()
+	Empty()
+	Empty()
+	Empty()
+	Empty()
+	Empty()
+	Empty()
+	Empty()
+	Empty()
+	Empty()
+	Empty()
+	Empty()
+	Empty()
+	Empty()
+	Empty()
+	Empty()
+	Empty()
+	Empty()
+	Empty()
+	Empty()
+	Empty()
+	Empty()
+	Empty()
+	Empty()
+	Apple()
+ºList(Point(0,0), Point(4,0), Point(5,0), Point(0,1), Point(1,1), Point(2,1), Point(3,1), Point(4,1), Point(5,1), Point(0,2), Point(1,2), Point(2,2), Point(3,2), Point(4,2), Point(5,2))
+	Empty()
+	Empty()
+	Empty()
+	Empty()
+SnakeBody(0.53333336)
+	Apple()
+rList(Point(0,0), Point(4,0), Point(5,0), Point(0,1), Point(1,1), Point(2,1), Point(3,1), Point(4,1), Point(5,1))
+	Empty()
+	Empty()
+SnakeBody(0.78333336)
+SnakeBody(0.95000005)
+SnakeBody(1.1166667)
+SnakeBody(0.95000005)
+SnakeBody(0.86666673)
+SnakeBody(0.8333334)
+	Apple()
+ÒList(Point(0,0), Point(4,0), Point(0,1), Point(1,1), Point(2,1), Point(3,1), Point(4,1), Point(0,2), Point(1,2), Point(2,2), Point(3,2), Point(4,2), Point(0,3), Point(1,3), Point(2,3), Point(3,3), Point(4,3))
+	Empty()
+	Empty()
+SnakeBody(0.78333336)
+	Empty()
+	Empty()
+	Apple()
+’List(Point(0,0), Point(1,0), Point(2,0), Point(0,1), Point(1,1), Point(2,1), Point(3,1), Point(4,1), Point(5,1), Point(0,2), Point(1,2), Point(2,2), Point(3,2), Point(4,2), Point(5,2), Point(0,3), Point(1,3), Point(2,3), Point(3,3), Point(4,3), Point(5,3), Point(0,4), Point(1,4), Point(2,4), Point(3,4), Point(4,4), Point(5,4), Point(0,5), Point(1,5), Point(2,5), Point(3,5), Point(4,5), Point(5,5))
+	Empty()
+	Empty()
+	Apple()
+îList(Point(0,1), Point(1,1), Point(2,1), Point(3,1), Point(4,1), Point(5,1), Point(0,2), Point(1,2), Point(2,2), Point(3,2), Point(4,2), Point(5,2), Point(0,3), Point(1,3), Point(2,3), Point(3,3), Point(4,3), Point(5,3), Point(0,4), Point(1,4), Point(2,4), Point(3,4), Point(4,4), Point(5,4), Point(0,5), Point(1,5), Point(2,5), Point(3,5), Point(4,5), Point(5,5))
+	Empty()
+	Empty()
+	Apple()
+ºList(Point(0,0), Point(1,0), Point(2,0), Point(0,1), Point(1,1), Point(2,1), Point(3,1), Point(4,1), Point(5,1), Point(0,2), Point(1,2), Point(2,2), Point(3,2), Point(4,2), Point(5,2))
+	Empty()
+	Empty()
+	Apple()
+–List(Point(0,1), Point(1,1), Point(2,1), Point(3,1), Point(4,1), Point(5,1), Point(0,2), Point(1,2), Point(2,2), Point(3,2), Point(4,2), Point(5,2))
+	Empty()
+	Empty()
+	Apple()
+ªList(Point(0,0), Point(1,0), Point(2,0), Point(6,0), Point(7,0), Point(8,0), Point(9,0), Point(0,1), Point(1,1), Point(2,1), Point(3,1), Point(4,1), Point(5,1), Point(6,1), Point(7,1), Point(8,1), Point(9,1), Point(0,2), Point(1,2), Point(2,2), Point(3,2), Point(4,2), Point(5,2), Point(6,2), Point(7,2), Point(8,2), Point(9,2), Point(0,3), Point(1,3), Point(2,3), Point(3,3), Point(4,3), Point(5,3), Point(6,3), Point(7,3), Point(8,3), Point(9,3), Point(0,4), Point(1,4), Point(2,4), Point(3,4), Point(4,4), Point(5,4), Point(6,4), Point(7,4), Point(8,4), Point(9,4), Point(0,5), Point(1,5), Point(2,5), Point(3,5), Point(4,5), Point(5,5), Point(6,5), Point(7,5), Point(8,5), Point(9,5), Point(0,6), Point(1,6), Point(2,6), Point(3,6), Point(4,6), Point(5,6), Point(6,6), Point(7,6), Point(8,6), Point(9,6))
+	Empty()
+	Empty()
+	Empty()
+	Empty()
+	Empty()
+	Empty()
+	Apple()
+†List(Point(3,0), Point(4,0), Point(5,0), Point(6,0), Point(0,1), Point(1,1), Point(2,1), Point(3,1), Point(4,1), Point(5,1), Point(6,1), Point(7,1), Point(8,1), Point(9,1), Point(0,2), Point(1,2), Point(2,2), Point(3,2), Point(4,2), Point(5,2), Point(6,2), Point(7,2), Point(8,2), Point(9,2), Point(0,3), Point(1,3), Point(2,3), Point(3,3), Point(4,3), Point(5,3), Point(6,3), Point(7,3), Point(8,3), Point(9,3), Point(0,4), Point(1,4), Point(2,4), Point(3,4), Point(4,4), Point(5,4), Point(6,4), Point(7,4), Point(8,4), Point(9,4), Point(0,5), Point(1,5), Point(2,5), Point(3,5), Point(4,5), Point(5,5), Point(6,5), Point(7,5), Point(8,5), Point(9,5), Point(0,6), Point(1,6), Point(2,6), Point(3,6), Point(4,6), Point(5,6), Point(6,6), Point(7,6), Point(8,6), Point(9,6))
+	Empty()
+	Empty()
+	Apple()
+âList(Point(6,0), Point(0,1), Point(1,1), Point(2,1), Point(3,1), Point(4,1), Point(5,1), Point(6,1), Point(7,1), Point(8,1), Point(9,1), Point(0,2), Point(1,2), Point(2,2), Point(3,2), Point(4,2), Point(5,2), Point(6,2), Point(7,2), Point(8,2), Point(9,2), Point(0,3), Point(1,3), Point(2,3), Point(3,3), Point(4,3), Point(5,3), Point(6,3), Point(7,3), Point(8,3), Point(9,3), Point(0,4), Point(1,4), Point(2,4), Point(3,4), Point(4,4), Point(5,4), Point(6,4), Point(7,4), Point(8,4), Point(9,4), Point(0,5), Point(1,5), Point(2,5), Point(3,5), Point(4,5), Point(5,5), Point(6,5), Point(7,5), Point(8,5), Point(9,5), Point(0,6), Point(1,6), Point(2,6), Point(3,6), Point(4,6), Point(5,6), Point(6,6), Point(7,6), Point(8,6), Point(9,6))
+SnakeBody(1.4123018)
+	Empty()
+	Empty()
+	Empty()
+	Empty()
+	Apple()
+ºList(Point(0,0), Point(1,0), Point(2,0), Point(0,1), Point(1,1), Point(2,1), Point(3,1), Point(4,1), Point(5,1), Point(0,2), Point(1,2), Point(2,2), Point(3,2), Point(4,2), Point(5,2))
+	Apple()
+ªList(Point(0,0), Point(1,0), Point(2,0), Point(6,0), Point(7,0), Point(8,0), Point(9,0), Point(0,1), Point(1,1), Point(2,1), Point(3,1), Point(4,1), Point(5,1), Point(6,1), Point(7,1), Point(8,1), Point(9,1), Point(0,2), Point(1,2), Point(2,2), Point(3,2), Point(4,2), Point(5,2), Point(6,2), Point(7,2), Point(8,2), Point(9,2), Point(0,3), Point(1,3), Point(2,3), Point(3,3), Point(4,3), Point(5,3), Point(6,3), Point(7,3), Point(8,3), Point(9,3), Point(0,4), Point(1,4), Point(2,4), Point(3,4), Point(4,4), Point(5,4), Point(6,4), Point(7,4), Point(8,4), Point(9,4), Point(0,5), Point(1,5), Point(2,5), Point(3,5), Point(4,5), Point(5,5), Point(6,5), Point(7,5), Point(8,5), Point(9,5), Point(0,6), Point(1,6), Point(2,6), Point(3,6), Point(4,6), Point(5,6), Point(6,6), Point(7,6), Point(8,6), Point(9,6))
+	Empty()
+	Empty()
+	Empty()
+	Empty()
+	Apple()
+–List(Point(0,1), Point(1,1), Point(2,1), Point(3,1), Point(4,1), Point(5,1), Point(0,2), Point(1,2), Point(2,2), Point(3,2), Point(4,2), Point(5,2))
+	Empty()
+	Empty()
+	Empty()
+	Empty()
+	Empty()
+	Apple()
+’List(Point(0,0), Point(1,0), Point(2,0), Point(0,1), Point(1,1), Point(2,1), Point(3,1), Point(4,1), Point(5,1), Point(0,2), Point(1,2), Point(2,2), Point(3,2), Point(4,2), Point(5,2), Point(0,3), Point(1,3), Point(2,3), Point(3,3), Point(4,3), Point(5,3), Point(0,4), Point(1,4), Point(2,4), Point(3,4), Point(4,4), Point(5,4), Point(0,5), Point(1,5), Point(2,5), Point(3,5), Point(4,5), Point(5,5))
+	Apple()
+ªList(Point(0,0), Point(1,0), Point(2,0), Point(6,0), Point(7,0), Point(8,0), Point(9,0), Point(0,1), Point(1,1), Point(2,1), Point(3,1), Point(4,1), Point(5,1), Point(6,1), Point(7,1), Point(8,1), Point(9,1), Point(0,2), Point(1,2), Point(2,2), Point(3,2), Point(4,2), Point(5,2), Point(6,2), Point(7,2), Point(8,2), Point(9,2), Point(0,3), Point(1,3), Point(2,3), Point(3,3), Point(4,3), Point(5,3), Point(6,3), Point(7,3), Point(8,3), Point(9,3), Point(0,4), Point(1,4), Point(2,4), Point(3,4), Point(4,4), Point(5,4), Point(6,4), Point(7,4), Point(8,4), Point(9,4), Point(0,5), Point(1,5), Point(2,5), Point(3,5), Point(4,5), Point(5,5), Point(6,5), Point(7,5), Point(8,5), Point(9,5), Point(0,6), Point(1,6), Point(2,6), Point(3,6), Point(4,6), Point(5,6), Point(6,6), Point(7,6), Point(8,6), Point(9,6))
+	Empty()
+	Empty()
+	Empty()
+	Empty()
+	Apple()
+îList(Point(0,1), Point(1,1), Point(2,1), Point(3,1), Point(4,1), Point(5,1), Point(0,2), Point(1,2), Point(2,2), Point(3,2), Point(4,2), Point(5,2), Point(0,3), Point(1,3), Point(2,3), Point(3,3), Point(4,3), Point(5,3), Point(0,4), Point(1,4), Point(2,4), Point(3,4), Point(4,4), Point(5,4), Point(0,5), Point(1,5), Point(2,5), Point(3,5), Point(4,5), Point(5,5))
+	Empty()
+	Empty()
+	Empty()
+	Empty()
+	Empty()
+	Apple()
+ºList(Point(0,0), Point(1,0), Point(2,0), Point(0,1), Point(1,1), Point(2,1), Point(3,1), Point(4,1), Point(5,1), Point(0,2), Point(1,2), Point(2,2), Point(3,2), Point(4,2), Point(5,2))
+	Apple()
+’List(Point(0,0), Point(1,0), Point(2,0), Point(0,1), Point(1,1), Point(2,1), Point(3,1), Point(4,1), Point(5,1), Point(0,2), Point(1,2), Point(2,2), Point(3,2), Point(4,2), Point(5,2), Point(0,3), Point(1,3), Point(2,3), Point(3,3), Point(4,3), Point(5,3), Point(0,4), Point(1,4), Point(2,4), Point(3,4), Point(4,4), Point(5,4), Point(0,5), Point(1,5), Point(2,5), Point(3,5), Point(4,5), Point(5,5))
+	Empty()
+	Empty()
+	Empty()
+	Empty()
+	Apple()
+–List(Point(0,1), Point(1,1), Point(2,1), Point(3,1), Point(4,1), Point(5,1), Point(0,2), Point(1,2), Point(2,2), Point(3,2), Point(4,2), Point(5,2))
+	Apple()
+îList(Point(0,1), Point(1,1), Point(2,1), Point(3,1), Point(4,1), Point(5,1), Point(0,2), Point(1,2), Point(2,2), Point(3,2), Point(4,2), Point(5,2), Point(0,3), Point(1,3), Point(2,3), Point(3,3), Point(4,3), Point(5,3), Point(0,4), Point(1,4), Point(2,4), Point(3,4), Point(4,4), Point(5,4), Point(0,5), Point(1,5), Point(2,5), Point(3,5), Point(4,5), Point(5,5))
+! 	Empty()
+! 	Empty()
+! 	Empty()
+! 	Empty()
+! 	Empty()
+! 	Empty()
+! 	Empty()
+! 	Empty()
+! 	Empty()
+! 	Empty()
+! 	Empty()
+! 	Empty()
+! 	Empty()
+! You got 12/26 points!
+! 1Your grade for the snake exercise will be : 2.54

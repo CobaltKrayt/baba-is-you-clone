@@ -6,9 +6,8 @@ plugins {
 
 
 application {
-    mainClass.set( 'snake.game.SnakeGame')
+    mainClass.set('baba.game.SnakeGame')
 }
-
 
 
 test {
@@ -40,9 +39,9 @@ dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'lib')
     testImplementation('junit:junit:4.13.2')
     testImplementation("org.scala-lang:scala-reflect") {
-      version {
-          strictly '2.13.11'
-      }
+        version {
+            strictly '2.13.11'
+        }
     }
     testImplementation('org.junit.vintage:junit-vintage-engine:5.9.0')
     testImplementation("org.scalatest:scalatest_${scalaMajorVersion}:3.0.9")
@@ -57,23 +56,23 @@ task zip(type: Zip) {
     dependsOn assemble
     dependsOn testClasses
     from fileTree(dir: '.')
-    include 'src/snake/logic/**.scala'
+    include 'src/baba/logic/**.scala'
 
-    archiveFileName = 'snake.zip'
+    archiveFileName = 'baba.zip'
     destinationDirectory = layout.buildDirectory.dir("$projectDir")
 }
 
 task test2_1(type: Test) {
-    description="Run tests for assignment 2.1 (snake)"
+    description = "Run tests for assignment 2.1 (baba)"
     filter {
-        includeTestsMatching "snake.SnakeTestsAssignment2_1"
+        includeTestsMatching "baba.SnakeTestsAssignment2_1"
     }
 }
 
 task test2_3(type: Test) {
-    description="Run tests for assignment 2.3 (snake)"
+    description = "Run tests for assignment 2.3 (baba)"
     filter {
-        includeTestsMatching "snake.SnakeTestsAssignment2_3"
+        includeTestsMatching "baba.SnakeTestsAssignment2_3"
     }
 }
 

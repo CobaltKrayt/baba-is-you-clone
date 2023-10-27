@@ -12,7 +12,7 @@ import generic.StringUtils._
 import infrastructure.TestBase
 import org.scalatest.exceptions.TestFailedException
 
-/**   * Generic test infrastructure for Snake and Tetris.
+/** * Generic test infrastructure for Snake and Tetris.
  *
  * This supports a game with a grid, filled with some CellType
  * on which some actions can be done.
@@ -43,7 +43,7 @@ abstract class GameTestSuite[
   GameAction,
   CellType <: CellTypeInterface[CellType],
   GameLogic <: GameLogicInterface[GameAction, CellType],
-  InitialInfo]()  extends TestBase {
+  InitialInfo]() extends TestBase {
 
   def charToGridType(ch: Char): CellType
 
@@ -53,7 +53,8 @@ abstract class GameTestSuite[
 
   sealed abstract class GameDisplay {
     def conforms(other: GameDisplay): Boolean
-    def isError : Boolean
+
+    def isError: Boolean
   }
 
   case class GridDisplay(grid: Seq[Seq[CellType]])
@@ -93,6 +94,7 @@ abstract class GameTestSuite[
       case GameOverDisplay() => true
       case _ => false
     }
+
     override def isError: Boolean = false
   }
 
@@ -146,9 +148,9 @@ abstract class GameTestSuite[
   def performActionsAndGetDisplay(random: TestRandomGen,
                                   logic: GameLogic,
                                   frameInput: FrameInput): GameDisplay = {
-      random.curNumber = frameInput.randomNumber
-      frameInput.actions.foreach(logic.performAction)
-      getDisplay(logic)
+    random.curNumber = frameInput.randomNumber
+    frameInput.actions.foreach(logic.performAction)
+    getDisplay(logic)
   }
 
   def canInterleave(testA: TestRecording, testB: TestRecording): Boolean = {
@@ -159,7 +161,7 @@ abstract class GameTestSuite[
     val logicB = makeGame(randomB, testB.initialInfo)
     val dispA = getDisplay(logicA)
     val dispB = getDisplay(logicB)
-    if(!dispA.conforms(testA.frames.head.display) ||
+    if (!dispA.conforms(testA.frames.head.display) ||
       !dispB.conforms(testB.frames.head.display))
       return false
 
@@ -177,24 +179,30 @@ abstract class GameTestSuite[
 
     lazy val implementationDisplays: Seq[GameDisplay] = {
       val random = new TestRandomGen(frames.head.input.randomNumber)
-      def catchLogicError(compute : => GameDisplay) : GameDisplay = {
+
+      def catchLogicError(compute: => GameDisplay): GameDisplay = {
         try {
           return compute
         } catch {
-          case e : Throwable => LogicFailed(e)
+          case e: Throwable => LogicFailed(e)
         }
       }
+
       try {
         val logic = makeGame(random, initialInfo)
         val displays = Seq.newBuilder[GameDisplay]
-        val firstDisplay = catchLogicError{ getDisplay(logic) }
+        val firstDisplay = catchLogicError {
+          getDisplay(logic)
+        }
         displays.addOne(firstDisplay)
         var error = firstDisplay.isError
         val inputIterator = frames.tail.iterator
-        while(!error && inputIterator.hasNext ) {
+        while (!error && inputIterator.hasNext) {
           val testFrame = inputIterator.next()
 
-          val newDisplay = catchLogicError {performActionsAndGetDisplay(random, logic, testFrame.input) }
+          val newDisplay = catchLogicError {
+            performActionsAndGetDisplay(random, logic, testFrame.input)
+          }
           displays.addOne(newDisplay)
           error = newDisplay.isError
         }
@@ -244,7 +252,7 @@ abstract class GameTestSuite[
        |this, we perform “interleave tests”: we instantiate two $gameLogicName objects with different
        |board sizes and alternate between performing a step on one and a step on the other. If
        |all is correct, the two games should progress exactly as they would if they were the only
-       |snake games being run. If this is not true, then there is likely some global state through
+       |baba games being run. If this is not true, then there is likely some global state through
        |which one game influences the other.
        |
        |
@@ -252,57 +260,60 @@ abstract class GameTestSuite[
        |Running two instances of $gameLogicName/and alternately doing steps between them results in some interference.
   """.stripMargin.replaceAll("\n", " ")
 
-  def wordWrap(s : String, lineLen : Int) : String = {
+  def wordWrap(s: String, lineLen: Int): String = {
     val res = new StringBuilder()
-    var line : List[String] = List()
+    var line: List[String] = List()
     var len = 0
-    for(word <- s.split("[ ]")) {
-      if(len + word.length > lineLen) {
-        res++=line.reverse.mkString(" ") + "\n"
+    for (word <- s.split("[ ]")) {
+      if (len + word.length > lineLen) {
+        res ++= line.reverse.mkString(" ") + "\n"
         line = List(word)
         len = word.length
       } else {
-        len+= word.length
+        len += word.length
         line = word :: line
       }
     }
-    if(line.nonEmpty) res++=line.reverse.mkString(" ")
+    if (line.nonEmpty) res ++= line.reverse.mkString(" ")
     res.toString()
   }
 
 
-  def checkGame(theTest : TestRecording, hint : String): Unit = {
+  def checkGame(theTest: TestRecording, hint: String): Unit = {
     def actionsString(actions: Seq[GameAction]): String =
       "<" ++ actions.map(_.toString).mkString(", ") ++ ">"
+
     val sbuild = new StringBuilder()
-    if(!hint.isEmpty) sbuild.append("\n" + wordWrap("Hint: "+hint,80) )
+    if (!hint.isEmpty) sbuild.append("\n" + wordWrap("Hint: " + hint, 80))
     sbuild.append("\n" + horizontalLineOfWidth(80) + "\n")
+
     def printTraceFrame(frame: TestFrame, actual: GameDisplay, index: Int): Unit = {
       sbuild.append(s"step=$index, rand=${frame.input.randomNumber}, actions=${actionsString(frame.input.actions)}\n")
 
       val frameIsCorrect = frame.display.conforms(actual)
-      val headerB = if(frameIsCorrect) "Got ✓" else "Got ✗"
+      val headerB = if (frameIsCorrect) "Got ✓" else "Got ✗"
       val frameString = twoColumnTable("Want", headerB, frame.display.toString, actual.toString)
 
       sbuild.append(frameString + "\n")
       sbuild.append("\n")
     }
+
     val didPass = theTest.passes
 
     if (!didPass) sbuild.append("This is what went wrong:\n\n")
     else sbuild.append("This is what we got & expected:\n\n")
-    
-      theTest.frames
-        .lazyZip(theTest.implementationDisplays)
-        .lazyZip(theTest.frames.indices).foreach(printTraceFrame)
-      assert(didPass,sbuild.toString())
-  }
-  def checkInterleave( testA : TestRecording, testB : TestRecording): Unit = {
-      val didPass = canInterleave(testA, testB)
 
-      assert(didPass, "\n" + InterleaveFailMsg)
+    theTest.frames
+      .lazyZip(theTest.implementationDisplays)
+      .lazyZip(theTest.frames.indices).foreach(printTraceFrame)
+    assert(didPass, sbuild.toString())
   }
 
+  def checkInterleave(testA: TestRecording, testB: TestRecording): Unit = {
+    val didPass = canInterleave(testA, testB)
+
+    assert(didPass, "\n" + InterleaveFailMsg)
+  }
 
 
 }
