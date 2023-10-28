@@ -13,7 +13,7 @@ case class Rule(subject: Subject, predicate: Predicate) {
     }
   }
 
-  private def matchesSubject(block: Block): Boolean = {
+  def matchesSubject(block: Block): Boolean = {
     subject match {
       case subject: WallRule => block.isInstanceOf[Wall]
       case subject: BabaSubject => block.isInstanceOf[Baba]
@@ -33,4 +33,20 @@ case class StopAction() extends Action {
 
   def revertAction(block: Block): Unit = block.stop = false
 }
+
+case class YouAction() extends Action {
+  def applyAction(block: Block): Unit = {
+    if (block.isInstanceOf[Environment]) {
+      block.asInstanceOf[Environment].controllable = true
+    }
+  }
+
+
+  def revertAction(block: Block): Unit = {
+    if (block.isInstanceOf[Environment]) {
+      block.asInstanceOf[Environment].controllable = false
+    }
+  }
+}
+
 

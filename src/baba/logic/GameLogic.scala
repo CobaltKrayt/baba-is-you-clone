@@ -31,7 +31,11 @@ case class GameState(gridDims: Dimensions, player: List[Block], gameMap: List[Bl
 
 
   private def nextPlayer(nextDirection: Direction): List[Block] = {
-    player.flatMap { playerBlock =>
+    val currentControllableBlocks = (player ++ gameMap).collect {
+      case block: Environment if block.controllable => block
+    }
+
+    currentControllableBlocks.flatMap { playerBlock =>
       val newPosition = nextPosition(nextDirection, playerBlock.coordinates)
 
       gameMap.find(block => block.coordinates == newPosition) match {
@@ -40,7 +44,11 @@ case class GameState(gridDims: Dimensions, player: List[Block], gameMap: List[Bl
         case _ =>
           val chainOfBlocks = findChainOfBlocks(playerBlock.coordinates, nextDirection)
           if (moveChain(chainOfBlocks, nextDirection)) {
-            Some(Wall(newPosition))
+            playerBlock match {
+              case _: Baba => Some(Baba(nextDirection, newPosition))
+              case _: Wall => Some(Wall(newPosition))
+              case _ => Some(playerBlock)
+            }
           } else {
             Some(playerBlock)
           }
@@ -98,10 +106,16 @@ case class GameState(gridDims: Dimensions, player: List[Block], gameMap: List[Bl
 
 
   def nextState(nextDirection: Direction): GameState = {
-    val newPlayerBlocks = nextPlayer(nextDirection)
 
-    if (newPlayerBlocks.forall(block => isWithinGrid(block.coordinates, gridDims)) && !newPlayerBlocks.exists(_.stop)) {
-      GameState(gridDims, newPlayerBlocks, gameMap, nextDirection)
+    if (player.exists(_.stop))
+      return this
+
+    val newPlayerBlocks = nextPlayer(nextDirection)
+    val newGameMapBlocks = (player ++ gameMap).filterNot(block => block.isInstanceOf[Environment] && block.asInstanceOf[Environment].controllable)
+
+
+    if (newPlayerBlocks.forall(block => isWithinGrid(block.coordinates, gridDims))) {
+      GameState(gridDims, newPlayerBlocks, newGameMapBlocks, nextDirection)
     } else {
       this
     }
@@ -114,9 +128,10 @@ class GameLogic(val random: RandomGenerator,
 
   var currentDirection: Direction = East()
   var currentRules: List[Rule] = List()
-  private val initalPlayer: List[Block] = List(Wall(Point(2, 0)), Wall(Point(3, 1)))
-  private val initialGameMap: List[Block] = List(Wall(Point(6, 6)), Wall(Point(6, 8)), WallRule(Point(8, 8))
-    , Connector(Point(8, 9)), StopRule(Point(9, 9)), BabaSubject(Point(12, 12)))
+  private val initalPlayer: List[Block] = List()
+  private val initialGameMap: List[Block] = List(Baba(currentDirection, Point(2, 0)), Wall(Point(6, 6)),
+    Wall(Point(6, 8)), WallRule(Point(8, 8)), Connector(Point(8, 9)), StopRule(Point(9, 9)), BabaSubject(Point(13, 13)),
+    Connector(Point(14, 13)), YouPredicate(Point(15, 13)))
 
   private var gameStates: List[GameState] = List(GameState(gridDims, initalPlayer, initialGameMap, currentDirection))
 
@@ -139,7 +154,7 @@ class GameLogic(val random: RandomGenerator,
             val downBlock = gameStates.last.getBlockAtPosition(Point(x, y + 1))
 
             if (upBlock.isInstanceOf[Subject] && downBlock.isInstanceOf[Predicate]) {
-              rules.append(Rule(leftBlock.asInstanceOf[Subject], rightBlock.asInstanceOf[Predicate]))
+              rules.append(Rule(upBlock.asInstanceOf[Subject], downBlock.asInstanceOf[Predicate]))
             }
 
 
@@ -151,20 +166,22 @@ class GameLogic(val random: RandomGenerator,
     rules.toList
   }
 
-  def gameOver: Boolean = gameStates.last.player.exists(_.stop)
+  def gameOver: Boolean = getPlayerBlocks().exists(_.stop)
 
   def step(): Unit = {
+
     if (!gameOver) {
 
       val newRules: List[Rule] = detectRules()
+      val allBlocks: List[Block] = gameStates.last.gameMap ++ gameStates.last.player
 
       currentRules.foreach { rule =>
         if (!newRules.contains(rule)) {
-          rule.revert(gameStates.last.gameMap)
+          rule.revert(allBlocks)
         }
       }
 
-      newRules.foreach(_.evaluate(gameStates.last.gameMap ++ gameStates.last.player))
+      newRules.foreach(_.evaluate(allBlocks))
 
       currentRules = newRules
       gameStates = gameStates :+ gameStates.last.nextState(currentDirection)

@@ -6,6 +6,7 @@ abstract class Block() {
 
   var push: Boolean
   var stop: Boolean
+  var controllable: Boolean
 
   var coordinates: Point
 }
@@ -19,6 +20,7 @@ case class Connector(override val location: Point) extends RuleBlock(location) {
 
   override var stop: Boolean = true
   override var push: Boolean = true
+  override var controllable: Boolean = false
 }
 
 abstract class Subject(override val location: Point) extends RuleBlock(location) {
@@ -30,11 +32,13 @@ abstract class Subject(override val location: Point) extends RuleBlock(location)
 case class WallRule(override val location: Point) extends Subject(location) {
   override var coordinates: Point = location
   override var push: Boolean = true
+  override var controllable: Boolean = false
 }
 
 case class BabaSubject(override val location: Point) extends Subject(location) {
   override var coordinates: Point = location
   override var push: Boolean = true
+  override var controllable: Boolean = false
 }
 
 abstract class Predicate(override val location: Point) extends RuleBlock(location) {
@@ -50,6 +54,16 @@ case class StopRule(override val location: Point) extends Predicate(location) {
   override var push: Boolean = true
 
   override def action: Action = StopAction()
+
+  override var controllable: Boolean = false
+}
+
+case class YouPredicate(override val location: Point) extends Predicate(location) {
+  override var push: Boolean = true
+
+  override def action: Action = YouAction()
+
+  override var controllable: Boolean = false
 }
 
 
@@ -58,6 +72,7 @@ abstract class Environment(val location: Point) extends Block {
 
   override var push: Boolean = false
   override var stop: Boolean = false
+  var controllable: Boolean = false
 
 
 }
@@ -77,4 +92,5 @@ case class Empty() extends Block {
   override var push: Boolean = false
 
   override var stop: Boolean = false
+  override var controllable: Boolean = false
 }

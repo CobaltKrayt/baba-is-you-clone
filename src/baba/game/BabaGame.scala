@@ -10,7 +10,7 @@ import processing.event.KeyEvent
 import java.awt.event.KeyEvent._
 import engine.GameBase
 import engine.graphics.{Color, Point, Rectangle}
-import baba.logic.{Baba, BabaSubject, Block, Connector, Dimensions, Direction, East, Empty, Environment, GameLogic, North, South, StopRule, Wall, WallRule, West, Point => GridPoint}
+import baba.logic.{Baba, BabaSubject, Block, Connector, Dimensions, Direction, East, Empty, Environment, GameLogic, North, South, StopRule, Wall, WallRule, West, YouPredicate, Point => GridPoint}
 import baba.game.BabaGame._
 import engine.graphics.Color._
 import engine.random.ScalaRandomGen
@@ -32,6 +32,7 @@ class BabaGame extends GameBase {
   var isConnector: PImage = _
   var stopRule: PImage = _
   var babaSubject: PImage = _
+  var youPredicate: PImage = _
 
   // this function is wrongly named draw by processing (is called on each update next to drawing)
   override def draw(): Unit = {
@@ -41,8 +42,8 @@ class BabaGame extends GameBase {
   }
 
   def drawGameOverScreen(): Unit = {
-    setFillColor(Red)
-    drawTextCentered("GAME OVER!", 20, screenArea.center)
+    setFillColor(LightBlue)
+    drawTextCentered("Stuck? Press Z to revert", 20, screenArea.center)
   }
 
   def drawGrid(): Unit = {
@@ -98,6 +99,8 @@ class BabaGame extends GameBase {
           image(isConnector, area.left, area.top, area.width, area.height)
         case StopRule(_) =>
           image(stopRule, area.left, area.top, area.width, area.height)
+        case YouPredicate(_) =>
+          image(youPredicate, area.left, area.top, area.width, area.height)
         case Empty() => ()
         case _ => ()
       }
@@ -156,6 +159,7 @@ class BabaGame extends GameBase {
     isConnector = loadImage("isConnector.png")
     stopRule = loadImage("stopRule.png")
     babaSubject = loadImage("baba_subject.png")
+    youPredicate = loadImage("you_predicate.png")
     // Fonts are loaded lazily, so when we call text()
     // for the first time, there is significant lag.
     // This prevents it from happening during gameplay.
