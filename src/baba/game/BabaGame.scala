@@ -133,6 +133,10 @@ class BabaGame extends GameBase {
       case VK_DOWN => changeDir(South())
       case VK_LEFT => changeDir(West())
       case VK_RIGHT => changeDir(East())
+      case VK_R => {
+        gameLogic.setReverse(true)
+        gameLogic.step()
+      }
       case _ => ()
     }
 
@@ -140,9 +144,11 @@ class BabaGame extends GameBase {
 
   override def keyReleased(event: KeyEvent): Unit = {
     event.getKeyCode match {
+      case VK_R => gameLogic.setReverse(false)
       case _ => ()
     }
   }
+
 
   override def settings(): Unit = {
     pixelDensity(displayDensity())

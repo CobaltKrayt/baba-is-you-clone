@@ -43,6 +43,9 @@ case class GameState(gridDims: Dimensions, player: List[Block], gameMap: List[Bl
           Some(playerBlock)
         case _ =>
           val chainOfBlocks = findChainOfBlocks(playerBlock.coordinates, nextDirection)
+          // Remove chain from from gameMap
+          // get moved blocks with moveChain
+          // add new chain to gameMap
           if (moveChain(chainOfBlocks, nextDirection)) {
             playerBlock match {
               case _: Baba => Some(Baba(nextDirection, newPosition))
@@ -134,6 +137,7 @@ class GameLogic(val random: RandomGenerator,
     Connector(Point(14, 13)), YouPredicate(Point(15, 13)))
 
   private var gameStates: List[GameState] = List(GameState(gridDims, initalPlayer, initialGameMap, currentDirection))
+  private var reverseFlag: Boolean = false
 
   def detectRules(): List[Rule] = {
     val rules = ListBuffer[Rule]()
@@ -170,7 +174,9 @@ class GameLogic(val random: RandomGenerator,
 
   def step(): Unit = {
 
-    if (!gameOver) {
+    if (reverseFlag) {
+      reverseSnake()
+    } else if (!gameOver) {
 
       val newRules: List[Rule] = detectRules()
       val allBlocks: List[Block] = gameStates.last.gameMap ++ gameStates.last.player
@@ -203,6 +209,16 @@ class GameLogic(val random: RandomGenerator,
   }
 
   def getPlayerBlocks(): List[Block] = gameStates.last.player
+
+  private def reverseSnake(): Unit = {
+    if (gameStates.length > 1) {
+      gameStates = gameStates.init
+    }
+  }
+
+  def setReverse(r: Boolean): Unit = {
+    reverseFlag = r
+  }
 
 
 }
