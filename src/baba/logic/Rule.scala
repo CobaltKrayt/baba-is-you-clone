@@ -49,4 +49,8 @@ case class YouAction() extends Action {
   }
 }
 
+case class WinAction() extends Action {
+  def applyAction(block: Block): Unit = block.win = true
 
+  def revertAction(block: Block): Unit = block.win = false
+}

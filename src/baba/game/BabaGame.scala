@@ -10,7 +10,7 @@ import processing.event.KeyEvent
 import java.awt.event.KeyEvent._
 import engine.GameBase
 import engine.graphics.{Color, Point, Rectangle}
-import baba.logic.{Baba, BabaSubject, Block, Connector, Dimensions, Direction, East, Empty, Environment, GameLogic, North, South, StopRule, Wall, WallRule, West, YouPredicate, Point => GridPoint}
+import baba.logic.{Baba, BabaSubject, Block, Connector, Dimensions, Direction, East, Empty, Environment, GameLogic, North, South, StopPredicate, Wall, WallRule, West, WinPredicate, YouPredicate, Point => GridPoint}
 import baba.game.BabaGame._
 import engine.graphics.Color._
 import engine.random.ScalaRandomGen
@@ -30,20 +30,26 @@ class BabaGame extends GameBase {
   var babaRight: PImage = _
   var wallRule: PImage = _
   var isConnector: PImage = _
-  var stopRule: PImage = _
+  var stopPredicate: PImage = _
   var babaSubject: PImage = _
   var youPredicate: PImage = _
+  var winPredicate: PImage = _
 
   // this function is wrongly named draw by processing (is called on each update next to drawing)
   override def draw(): Unit = {
     updateState()
     drawGrid()
-    if (gameLogic.gameOver) drawGameOverScreen()
+    if (gameLogic.gameWon) drawGameWon()
   }
 
   def drawGameOverScreen(): Unit = {
     setFillColor(LightBlue)
-    drawTextCentered("Stuck? Press Z to revert", 20, screenArea.center)
+    drawTextCentered("Stuck? Press Z to revert or R to reset", 20, screenArea.center)
+  }
+
+  def drawGameWon(): Unit = {
+    setFillColor(LawnGreen)
+    drawTextCentered("GameWon", 20, screenArea.center)
   }
 
   def drawGrid(): Unit = {
@@ -57,7 +63,7 @@ class BabaGame extends GameBase {
       Rectangle(leftUp, widthPerCell, heightPerCell)
     }
 
-    def drawSpriteForDirection(dir: Direction, area: Rectangle): Unit = {
+    def drawBabaForDirection(dir: Direction, area: Rectangle): Unit = {
       val sprite = dir match {
         case North() => babaUp
         case South() => babaDown
@@ -74,12 +80,12 @@ class BabaGame extends GameBase {
       def drawShapeForDirection(block: Block): Unit = {
         if (player.contains(block)) {
           block match {
-            case Baba(_, _) => drawSpriteForDirection(gameLogic.currentDirection, area)
+            case Baba(_, _) => drawBabaForDirection(gameLogic.currentDirection, area)
             case _ => ()
           }
         } else {
           block match {
-            case Baba(direction, _) => drawSpriteForDirection(direction, area)
+            case Baba(direction, _) => drawBabaForDirection(direction, area)
             case _ => ()
           }
         }
@@ -97,10 +103,12 @@ class BabaGame extends GameBase {
           image(babaSubject, area.left, area.top, area.width, area.height)
         case Connector(_) =>
           image(isConnector, area.left, area.top, area.width, area.height)
-        case StopRule(_) =>
-          image(stopRule, area.left, area.top, area.width, area.height)
+        case StopPredicate(_) =>
+          image(stopPredicate, area.left, area.top, area.width, area.height)
         case YouPredicate(_) =>
           image(youPredicate, area.left, area.top, area.width, area.height)
+        case WinPredicate(_) =>
+          image(winPredicate, area.left, area.top, area.width, area.height)
         case Empty() => ()
         case _ => ()
       }
@@ -134,6 +142,10 @@ class BabaGame extends GameBase {
       case VK_LEFT => changeDir(West())
       case VK_RIGHT => changeDir(East())
       case VK_R => {
+        gameLogic.setReset(true)
+        changeDir(South())
+      }
+      case VK_Z => {
         gameLogic.setReverse(true)
         gameLogic.step()
       }
@@ -144,7 +156,8 @@ class BabaGame extends GameBase {
 
   override def keyReleased(event: KeyEvent): Unit = {
     event.getKeyCode match {
-      case VK_R => gameLogic.setReverse(false)
+      case VK_Z => gameLogic.setReverse(false)
+      case VK_R => gameLogic.setReset(false)
       case _ => ()
     }
   }
@@ -163,9 +176,10 @@ class BabaGame extends GameBase {
     babaRight = loadImage("baba_right.png")
     wallRule = loadImage("wallRule.png")
     isConnector = loadImage("isConnector.png")
-    stopRule = loadImage("stopRule.png")
+    stopPredicate = loadImage("stop_predicate.png")
     babaSubject = loadImage("baba_subject.png")
     youPredicate = loadImage("you_predicate.png")
+    winPredicate = loadImage("win_predicate.png")
     // Fonts are loaded lazily, so when we call text()
     // for the first time, there is significant lag.
     // This prevents it from happening during gameplay.
@@ -178,7 +192,6 @@ class BabaGame extends GameBase {
 
   def updateState(): Unit = {
     if (updateTimer.timeForNextFrame()) {
-      //gameLogic.step()
       updateTimer.advanceFrame()
     }
   }

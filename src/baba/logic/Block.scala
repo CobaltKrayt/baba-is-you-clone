@@ -7,6 +7,7 @@ abstract class Block() {
   var push: Boolean
   var stop: Boolean
   var controllable: Boolean
+  var win: Boolean
 
   var coordinates: Point
 }
@@ -21,10 +22,12 @@ case class Connector(override val location: Point) extends RuleBlock(location) {
   override var stop: Boolean = true
   override var push: Boolean = true
   override var controllable: Boolean = false
+  override var win: Boolean = false
 }
 
 abstract class Subject(override val location: Point) extends RuleBlock(location) {
 
+  override var win: Boolean = false
   override var stop: Boolean = true
 
 }
@@ -42,6 +45,7 @@ case class BabaSubject(override val location: Point) extends Subject(location) {
 }
 
 abstract class Predicate(override val location: Point) extends RuleBlock(location) {
+  override var win = false
   override var coordinates: Point = location
 
   def action: Action
@@ -50,7 +54,7 @@ abstract class Predicate(override val location: Point) extends RuleBlock(locatio
 }
 
 
-case class StopRule(override val location: Point) extends Predicate(location) {
+case class StopPredicate(override val location: Point) extends Predicate(location) {
   override var push: Boolean = true
 
   override def action: Action = StopAction()
@@ -66,8 +70,17 @@ case class YouPredicate(override val location: Point) extends Predicate(location
   override var controllable: Boolean = false
 }
 
+case class WinPredicate(override val location: Point) extends Predicate(location) {
+  override var push: Boolean = true
+
+  override def action: Action = WinAction()
+
+  override var controllable: Boolean = false
+}
+
 
 abstract class Environment(val location: Point) extends Block {
+  var win = false
   override var coordinates: Point = location
 
   override var push: Boolean = false
@@ -87,6 +100,7 @@ case class Wall(override val location: Point) extends Environment(location) {
 }
 
 case class Empty() extends Block {
+  override var win = false
   override var coordinates: Point = Point(0, 0)
 
   override var push: Boolean = false
