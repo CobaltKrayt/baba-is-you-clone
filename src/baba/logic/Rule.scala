@@ -1,56 +1,56 @@
 package baba.logic
 
 case class Rule(subject: Subject, predicate: Predicate) {
-  def evaluate(blocks: List[Block]): Unit = {
+  def enactOn(blocks: List[Block]): Unit = {
     blocks.foreach { block =>
-      if (matchesSubject(block)) predicate.action.applyAction(block)
+      if (matchesSubject(block)) predicate.property.applyProperty(block)
     }
   }
 
-  def revert(blocks: List[Block]): Unit = {
+  def repealOn(blocks: List[Block]): Unit = {
     blocks.foreach { block =>
-      if (matchesSubject(block)) predicate.action.revertAction(block)
+      if (matchesSubject(block)) predicate.property.removeProperty(block)
     }
   }
 
   def matchesSubject(block: Block): Boolean = {
     subject match {
-      case subject: WallRule => block.isInstanceOf[Wall]
+      case subject: WallSubject => block.isInstanceOf[Wall]
       case subject: BabaSubject => block.isInstanceOf[Baba]
       case _ => false
     }
   }
 }
 
-trait Action {
-  def applyAction(block: Block): Unit
+trait Property {
+  def applyProperty(block: Block): Unit
 
-  def revertAction(block: Block): Unit
+  def removeProperty(block: Block): Unit
 }
 
-case class StopAction() extends Action {
-  def applyAction(block: Block): Unit = block.stop = true
+case class StopProperty() extends Property {
+  def applyProperty(block: Block): Unit = block.stop = true
 
-  def revertAction(block: Block): Unit = block.stop = false
+  def removeProperty(block: Block): Unit = block.stop = false
 }
 
-case class YouAction() extends Action {
-  def applyAction(block: Block): Unit = {
+case class YouProperty() extends Property {
+  def applyProperty(block: Block): Unit = {
     if (block.isInstanceOf[Environment]) {
       block.asInstanceOf[Environment].controllable = true
     }
   }
 
 
-  def revertAction(block: Block): Unit = {
+  def removeProperty(block: Block): Unit = {
     if (block.isInstanceOf[Environment]) {
       block.asInstanceOf[Environment].controllable = false
     }
   }
 }
 
-case class WinAction() extends Action {
-  def applyAction(block: Block): Unit = block.win = true
+case class WinProperty() extends Property {
+  def applyProperty(block: Block): Unit = block.win = true
 
-  def revertAction(block: Block): Unit = block.win = false
+  def removeProperty(block: Block): Unit = block.win = false
 }

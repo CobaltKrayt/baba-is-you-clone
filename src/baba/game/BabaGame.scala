@@ -10,7 +10,7 @@ import processing.event.KeyEvent
 import java.awt.event.KeyEvent._
 import engine.GameBase
 import engine.graphics.{Color, Point, Rectangle}
-import baba.logic.{Baba, BabaSubject, Block, Connector, Dimensions, Direction, East, Empty, Environment, GameLogic, North, South, StopPredicate, Wall, WallRule, West, WinPredicate, YouPredicate, Point => GridPoint}
+import baba.logic.{Baba, BabaSubject, Block, Connector, Dimensions, Direction, East, Empty, Environment, GameLogic, North, South, StopPredicate, Wall, WallSubject, West, WinPredicate, YouPredicate, Point => GridPoint}
 import baba.game.BabaGame._
 import engine.graphics.Color._
 import engine.random.ScalaRandomGen
@@ -28,7 +28,7 @@ class BabaGame extends GameBase {
   var babaDown: PImage = _
   var babaLeft: PImage = _
   var babaRight: PImage = _
-  var wallRule: PImage = _
+  var wallSubject: PImage = _
   var isConnector: PImage = _
   var stopPredicate: PImage = _
   var babaSubject: PImage = _
@@ -97,8 +97,8 @@ class BabaGame extends GameBase {
         case Wall(_) =>
           setFillColor(Color.DarkGreen)
           drawRectangle(area)
-        case WallRule(_) =>
-          image(wallRule, area.left, area.top, area.width, area.height)
+        case WallSubject(_) =>
+          image(wallSubject, area.left, area.top, area.width, area.height)
         case BabaSubject(_) =>
           image(babaSubject, area.left, area.top, area.width, area.height)
         case Connector(_) =>
@@ -109,7 +109,6 @@ class BabaGame extends GameBase {
           image(youPredicate, area.left, area.top, area.width, area.height)
         case WinPredicate(_) =>
           image(winPredicate, area.left, area.top, area.width, area.height)
-        case Empty() => ()
         case _ => ()
       }
     }
@@ -131,23 +130,16 @@ class BabaGame extends GameBase {
    */
   override def keyPressed(event: KeyEvent): Unit = {
 
-    def changeDir(dir: Direction): Unit = {
-      gameLogic.changeDir(dir)
-      gameLogic.step()
-    }
-
     event.getKeyCode match {
-      case VK_UP => changeDir(North())
-      case VK_DOWN => changeDir(South())
-      case VK_LEFT => changeDir(West())
-      case VK_RIGHT => changeDir(East())
+      case VK_UP => gameLogic.update(North())
+      case VK_DOWN => gameLogic.update(South())
+      case VK_LEFT => gameLogic.update(West())
+      case VK_RIGHT => gameLogic.update(East())
       case VK_R => {
-        gameLogic.setReset(true)
-        changeDir(South())
+        gameLogic.reset()
       }
       case VK_Z => {
-        gameLogic.setReverse(true)
-        gameLogic.step()
+        gameLogic.undo()
       }
       case _ => ()
     }
@@ -156,12 +148,9 @@ class BabaGame extends GameBase {
 
   override def keyReleased(event: KeyEvent): Unit = {
     event.getKeyCode match {
-      case VK_Z => gameLogic.setReverse(false)
-      case VK_R => gameLogic.setReset(false)
       case _ => ()
     }
   }
-
 
   override def settings(): Unit = {
     pixelDensity(displayDensity())
@@ -174,7 +163,7 @@ class BabaGame extends GameBase {
     babaDown = loadImage("baba_down.png")
     babaLeft = loadImage("baba_left.png")
     babaRight = loadImage("baba_right.png")
-    wallRule = loadImage("wallRule.png")
+    wallSubject = loadImage("wall_subject.png")
     isConnector = loadImage("isConnector.png")
     stopPredicate = loadImage("stop_predicate.png")
     babaSubject = loadImage("baba_subject.png")

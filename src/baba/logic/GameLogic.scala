@@ -17,7 +17,7 @@ case class GameState(gridDims: Dimensions, gameMap: List[Block],
   var oldChain: List[Block] = List()
 
   def getBlockAtPosition(p: Point): Block = {
-    gameMap.find(_.coordinates == p).getOrElse(Empty())
+    gameMap.find(_.coordinates == p).getOrElse(Empty(p))
   }
 
   def isWithinGrid(p: Point, gridDims: Dimensions): Boolean = {
@@ -86,7 +86,7 @@ case class GameState(gridDims: Dimensions, gameMap: List[Block],
             block match {
               case _: Baba => Baba(direction, newBlockPosition)
               case _: Wall => Wall(newBlockPosition)
-              case _: WallRule => WallRule(newBlockPosition)
+              case _: WallSubject => WallSubject(newBlockPosition)
               case _: Connector => Connector(newBlockPosition)
               case _: BabaSubject => BabaSubject(newBlockPosition)
               case _: StopPredicate => StopPredicate(newBlockPosition)
@@ -141,7 +141,7 @@ class GameLogic(val random: RandomGenerator,
 
   private val initalPlayer: List[Block] = List()
   private val initialGameMap: List[Block] = List(Baba(currentDirection, Point(2, 0)), Wall(Point(6, 6)),
-    Wall(Point(6, 8)), WallRule(Point(8, 8)), Connector(Point(8, 9)), StopPredicate(Point(9, 9)), BabaSubject(Point(13, 13)),
+    Wall(Point(6, 8)), WallSubject(Point(8, 8)), Connector(Point(8, 9)), StopPredicate(Point(9, 9)), BabaSubject(Point(13, 13)),
     Connector(Point(14, 13)), YouPredicate(Point(15, 13)), WinPredicate(Point(18, 18)))
   val initialGameState = GameState(gridDims, initialGameMap, currentDirection)
 
@@ -157,47 +157,38 @@ class GameLogic(val random: RandomGenerator,
     gameStates = List(initialGameState)
   }
 
-  def step(): Unit = {
+  def undo(): Unit = {
 
-    if (resetFlag) {
-      reset()
-      val newRules: List[Rule] = detectRules()
-      val allBlocks: List[Block] = gameStates.last.gameMap
+  }
 
-      currentRules.foreach { rule =>
-        if (!newRules.contains(rule)) {
-          rule.revert(allBlocks)
-        }
+  def update(direction: Direction): Unit = {
+
+    updateDir(direction)
+
+    updateRules()
+
+    val newGame = gameStates.last.nextState(currentDirection)
+    gameWon = newGame.hasWon()
+    gameStates = gameStates :+ newGame
+
+  }
+
+  def updateRules() = {
+    // TODO: Make currentRules part of the game state
+
+    val newRules: List[Rule] = detectRules()
+    val allBlocks: List[Block] = gameStates.last.gameMap
+
+    currentRules.foreach { rule =>
+      if (!newRules.contains(rule)) {
+        rule.repealOn(allBlocks)
       }
-
-      newRules.foreach(_.evaluate(allBlocks))
-
-      currentRules = newRules
-      gameStates = gameStates :+ gameStates.last.nextState(currentDirection)
-    } else if (reverseFlag) {
-      reverseSnake()
-    } else if (!gameWon) {
-
-
-      val newRules: List[Rule] = detectRules()
-      val allBlocks: List[Block] = gameStates.last.gameMap
-
-      currentRules.foreach { rule =>
-        if (!newRules.contains(rule)) {
-          rule.revert(allBlocks)
-        }
-      }
-
-
-      newRules.foreach(_.evaluate(allBlocks))
-      println(getPlayerBlocks())
-
-      currentRules = newRules
-      val newGame = gameStates.last.nextState(currentDirection)
-      gameWon = newGame.hasWon()
-      gameStates = gameStates :+ newGame
-
     }
+
+    newRules.foreach(_.enactOn(allBlocks))
+    println(getPlayerBlocks())
+
+    currentRules = newRules
   }
 
   def detectRules(): List[Rule] = {
@@ -231,7 +222,7 @@ class GameLogic(val random: RandomGenerator,
     rules.toList
   }
 
-  def changeDir(d: Direction): Unit = {
+  def updateDir(d: Direction): Unit = {
     currentDirection = d
   }
 
@@ -255,21 +246,13 @@ class GameLogic(val random: RandomGenerator,
 
     currentRules.foreach { rule =>
       if (!newRules.contains(rule)) {
-        rule.revert(allBlocks)
+        rule.repealOn(allBlocks)
       }
     }
 
-    newRules.foreach(_.evaluate(allBlocks))
+    newRules.foreach(_.enactOn(allBlocks))
 
     currentRules = newRules
-  }
-
-  def setReset(r: Boolean): Unit = {
-    resetFlag = r
-  }
-
-  def setReverse(r: Boolean): Unit = {
-    reverseFlag = r
   }
 
 
