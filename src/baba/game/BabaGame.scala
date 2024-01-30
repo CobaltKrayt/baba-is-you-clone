@@ -1,6 +1,4 @@
-// DO NOT MODIFY FOR BASIC SUBMISSION
 // scalastyle:off
-
 package baba.game
 
 import java.awt.event
@@ -75,12 +73,12 @@ class BabaGame extends GameBase {
 
 
     def drawCell(area: Rectangle, block: Block): Unit = {
-      val player = gameLogic.getPlayerBlocks()
+      val player = gameLogic.currentState.getPlayerBlocks
 
       def drawShapeForDirection(block: Block): Unit = {
         if (player.contains(block)) {
           block match {
-            case Baba(_, _) => drawBabaForDirection(gameLogic.currentDirection, area)
+            case Baba(_, _) => drawBabaForDirection(gameLogic.gameStates.last.previousDirection, area)
             case _ => ()
           }
         } else {
