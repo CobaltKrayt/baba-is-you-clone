@@ -28,6 +28,18 @@ trait Property {
   def removeProperty(block: Block): Unit
 }
 
+case class PushProperty() extends Property {
+  def applyProperty(block: Block): Unit = {
+    block.stop = true
+    block.push = true
+  }
+
+  def removeProperty(block: Block): Unit = {
+    block.stop = false
+    block.push = false
+  }
+}
+
 case class StopProperty() extends Property {
   def applyProperty(block: Block): Unit = block.stop = true
 

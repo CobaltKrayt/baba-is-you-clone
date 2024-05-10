@@ -45,6 +45,11 @@ case class StopPredicate(override val location: Point) extends Predicate(locatio
 
 }
 
+case class PushPredicate(override val location: Point) extends Predicate(location) {
+  override def property: Property = PushProperty()
+
+}
+
 case class YouPredicate(override val location: Point) extends Predicate(location) {
   override def property: Property = YouProperty()
 

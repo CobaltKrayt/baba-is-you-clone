@@ -8,7 +8,7 @@ import processing.event.KeyEvent
 import java.awt.event.KeyEvent._
 import engine.GameBase
 import engine.graphics.{Color, Point, Rectangle}
-import baba.logic.{Baba, BabaSubject, Block, Connector, Dimensions, Direction, East, Empty, Environment, GameLogic, North, South, StopPredicate, Wall, WallSubject, West, WinPredicate, YouPredicate, Point => GridPoint}
+import baba.logic.{Baba, BabaSubject, Block, Connector, Dimensions, Direction, East, Empty, Environment, GameLogic, North, PushPredicate, South, StopPredicate, Wall, WallSubject, West, WinPredicate, YouPredicate, Point => GridPoint}
 import baba.game.BabaGame._
 import engine.graphics.Color._
 import engine.random.ScalaRandomGen
@@ -32,6 +32,7 @@ class BabaGame extends GameBase {
   var babaSubject: PImage = _
   var youPredicate: PImage = _
   var winPredicate: PImage = _
+  var pushPredicate: PImage = _
 
   // this function is wrongly named draw by processing (is called on each update next to drawing)
   override def draw(): Unit = {
@@ -107,6 +108,8 @@ class BabaGame extends GameBase {
           image(youPredicate, area.left, area.top, area.width, area.height)
         case WinPredicate(_) =>
           image(winPredicate, area.left, area.top, area.width, area.height)
+        case PushPredicate(_) =>
+          image(pushPredicate, area.left, area.top, area.width, area.height)
         case _ => ()
       }
     }
@@ -167,6 +170,7 @@ class BabaGame extends GameBase {
     babaSubject = loadImage("baba_subject.png")
     youPredicate = loadImage("you_predicate.png")
     winPredicate = loadImage("win_predicate.png")
+    pushPredicate = loadImage("push_predicate.png")
     // Fonts are loaded lazily, so when we call text()
     // for the first time, there is significant lag.
     // This prevents it from happening during gameplay.
@@ -187,7 +191,6 @@ class BabaGame extends GameBase {
 
 
 object BabaGame {
-
 
   val WidthCellInPixels: Double = 20 * GameLogic.DrawSizeFactor
   val HeightCellInPixels: Double = WidthCellInPixels
