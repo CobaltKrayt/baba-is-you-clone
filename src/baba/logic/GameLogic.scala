@@ -15,8 +15,8 @@ import scala.util.control.Breaks.break
 case class GameState(gridDims: Dimensions, gameMap: List[Block],
                      previousDirection: Direction, rules: List[Rule]) {
 
-  def getBlockAtPosition(p: Point): Block = {
-    gameMap.find(_.coordinates == p).getOrElse(Empty(p))
+  def getBlockAtPosition(p: Point, blockMap: List[Block]): Block = {
+    blockMap.find(_.coordinates == p).getOrElse(Empty(p))
   }
 
   def isWithinGrid(p: Point, gridDims: Dimensions): Boolean = {
@@ -107,24 +107,61 @@ case class GameState(gridDims: Dimensions, gameMap: List[Block],
     }
   }
 
-  private def nextGameMap(nextDirection: Direction): List[Block] = {
-    movePlayer(nextDirection)
+  def updateRules(newGameMap: List[Block]): List[Rule] = {
+
+    val newRules: List[Rule] = detectRules(newGameMap)
+    val allBlocks: List[Block] = newGameMap
+
+    rules.foreach { rule =>
+      if (!newRules.contains(rule)) {
+        rule.repealOn(allBlocks)
+      }
+    }
+
+    newRules.foreach(_.enactOn(allBlocks))
+
+    newRules
   }
 
-  def hasWon(): Boolean = {
-    val winningBlocks = gameMap.filter(_.win).map(_.coordinates)
-    val playerBlocks = gameMap.filter(_.controllable).map(_.coordinates)
+  def detectRules(newGameMap: List[Block]): List[Rule] = {
+    val rules = ListBuffer[Rule]()
 
-    winningBlocks.intersect(playerBlocks).nonEmpty
+    for (y <- 0 until gridDims.height) {
+      for (x <- 0 until gridDims.width) {
+        val point = Point(x, y)
+        getBlockAtPosition(point, newGameMap) match {
+          case Connector(_) => {
+            val leftBlock = getBlockAtPosition(Point(x - 1, y), newGameMap)
+            val rightBlock = getBlockAtPosition(Point(x + 1, y), newGameMap)
+
+            if (leftBlock.isInstanceOf[Subject] && rightBlock.isInstanceOf[Predicate]) {
+              rules.append(Rule(leftBlock.asInstanceOf[Subject], rightBlock.asInstanceOf[Predicate]))
+            }
+
+            val upBlock = getBlockAtPosition(Point(x, y - 1), newGameMap)
+            val downBlock = getBlockAtPosition(Point(x, y + 1), newGameMap)
+
+            if (upBlock.isInstanceOf[Subject] && downBlock.isInstanceOf[Predicate]) {
+              rules.append(Rule(upBlock.asInstanceOf[Subject], downBlock.asInstanceOf[Predicate]))
+            }
+          }
+          case _ => ()
+        }
+      }
+    }
+    rules.toList
   }
+
 
   def nextState(nextDirection: Direction): GameState = {
 
-    // Tackle rules here
 
-    val newGameMapBlocks = nextGameMap(nextDirection)
+    val newGameMapBlocks = movePlayer(nextDirection)
+    val newRules = updateRules(newGameMapBlocks)
+    //println(newRules)
+
     if (newGameMapBlocks.forall(block => isWithinGrid(block.coordinates, gridDims))) {
-      GameState(gridDims, newGameMapBlocks, nextDirection, rules)
+      GameState(gridDims, newGameMapBlocks, nextDirection, newRules)
     } else {
       this
     }
@@ -135,8 +172,7 @@ class GameLogic(val random: RandomGenerator,
                 val gridDims: Dimensions) {
 
   private val initialDirection: Direction = East()
-  private val initialRules: List[Rule] = List()
-  var currentRules: List[Rule] = List()
+  private val initialRules: List[Rule] = List(Rule(WallSubject(Point(8, 8)), StopPredicate(Point(8, 10))), Rule(BabaSubject(Point(13, 13)), YouPredicate(Point(15, 13))))
 
   private val initialGameMap: List[Block] = List(Baba(initialDirection, Point(2, 0)), Wall(Point(6, 6)),
     Wall(Point(6, 8)), WallSubject(Point(8, 8)), Connector(Point(8, 9)), StopPredicate(Point(8, 10)),
@@ -159,64 +195,27 @@ class GameLogic(val random: RandomGenerator,
 
   def update(direction: Direction): Unit = {
 
-    updateRules()
-
-    // println(currentState.gameMap)
     val newGame = gameStates.last.nextState(direction)
-    gameWon = newGame.hasWon()
+    
+    //println(newGame.rules)
+    gameWon = hasWon(newGame)
     gameStates = gameStates :+ newGame
 
   }
 
-  def updateRules() = {
-    // TODO: Make currentRules part of the game state
-
-    val newRules: List[Rule] = detectRules()
-    val allBlocks: List[Block] = gameStates.last.gameMap
-
-    currentRules.foreach { rule =>
-      if (!newRules.contains(rule)) {
-        rule.repealOn(allBlocks)
-      }
-    }
-
-    newRules.foreach(_.enactOn(allBlocks))
-
-    currentRules = newRules
-  }
-
-  def detectRules(): List[Rule] = {
-    val rules = ListBuffer[Rule]()
-
-    for (y <- 0 until gridDims.height) {
-      for (x <- 0 until gridDims.width) {
-        val point = Point(x, y)
-        gameStates.last.getBlockAtPosition(point) match {
-          case Connector(_) => {
-            val leftBlock = gameStates.last.getBlockAtPosition(Point(x - 1, y))
-            val rightBlock = gameStates.last.getBlockAtPosition(Point(x + 1, y))
-
-            if (leftBlock.isInstanceOf[Subject] && rightBlock.isInstanceOf[Predicate]) {
-              rules.append(Rule(leftBlock.asInstanceOf[Subject], rightBlock.asInstanceOf[Predicate]))
-            }
-
-            val upBlock = gameStates.last.getBlockAtPosition(Point(x, y - 1))
-            val downBlock = gameStates.last.getBlockAtPosition(Point(x, y + 1))
-
-            if (upBlock.isInstanceOf[Subject] && downBlock.isInstanceOf[Predicate]) {
-              rules.append(Rule(upBlock.asInstanceOf[Subject], downBlock.asInstanceOf[Predicate]))
-            }
-          }
-          case _ => ()
-        }
-      }
-    }
-    rules.toList
-  }
-
   def getBlockType(p: Point): Block = {
     val lastState = gameStates.last
-    lastState.getBlockAtPosition(p)
+    lastState.getBlockAtPosition(p, gameStates.last.gameMap)
+  }
+
+  def hasWon(gameState: GameState): Boolean = {
+    val winningBlocks = gameState.gameMap.filter(_.win).map(_.coordinates)
+    val playerBlocks = gameState.gameMap.filter(_.controllable).map(_.coordinates)
+
+    println(winningBlocks)
+    println(playerBlocks)
+    winningBlocks.intersect(playerBlocks).nonEmpty
+
   }
 
 }
